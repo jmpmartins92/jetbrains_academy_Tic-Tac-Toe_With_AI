@@ -43,7 +43,11 @@ public class InputCheck {
      * different coordinates of the board. It checks if the input contains only valid chars, namely X, O and ' '.
      * If it passes both tests, sets the errorCode to 0, which corresponds to no errors. Otherwise, it will set the
      * errorCode to a specific value to provide the appropriate error message.
+     * @deprecated
+     * The user will no longer provide a boardState.
+     *
      */
+    @Deprecated
     public void initialBoardStateCheck() {
         if (input.length() != 9) {
             setErrorCode(1);

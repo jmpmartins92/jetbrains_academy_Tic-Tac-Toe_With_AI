@@ -100,13 +100,19 @@ public class Coordinate {
         setSymbol(symbol);
     }
 
+
     /**
      * Finds which symbol (X or O) should be set for a coordinate, depending on the present number of X and O characters
      * on the game board.
      * If there are more X's than O's on the board, sets the symbol to O. Otherwise, sets it to X.
      *
      * @param board the game board.
+     *
+     *
+     * @Deprecated
+     * The symbol of the coordinates provided by the user will now always be X, while the AI always plays O.
      */
+    @Deprecated
     public void setCoordinateSymbol(Board board) {
         String boardState = board.getBoardState();
         int numX = 0;

@@ -17,6 +17,15 @@ public class Board {
         this.boardState = boardState;
     }
 
+
+    /**
+     * Constructor to create an empty board, defining its boardState as a string with 9 ' ' (spaces), representing the
+     * 9 existing coordinates as empty cells.
+     */
+    public Board() {
+        this.boardState = "         ";
+    }
+
     /**
      * Getter for the boardState of a game board.
      *

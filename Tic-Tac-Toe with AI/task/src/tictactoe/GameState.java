@@ -96,17 +96,15 @@ public class GameState {
     }
 
     /**
-     * Checks if there are any empty cells and, if not, the game is considered a draw. As the previous method
+     * Checks if there are any empty cells and, if not, the game state is set to a draw. As the previous method
      * gameNotFinishedCheck(), the result of this method only holds true if the method gameWon() returns false.
      *
-     * @return boolean true if the game results in a draw, and false if otherwise.
      */
-    private boolean drawCheck() {
+    private void drawCheck() {
         boolean condition = !board.getBoardState().contains(" ");
         if (!condition) {
             setGameState("Draw");
         }
-        return !condition;
     }
 
     /**

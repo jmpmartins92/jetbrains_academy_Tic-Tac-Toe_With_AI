@@ -8,17 +8,34 @@ import java.util.Scanner;
  */
 public class InputRequests {
 
+    Board board;
+
+    /**
+     * Constructor for the requests made to the user.
+     *
+     * @param board which will be used to compare cells with provided input
+     */
+    public InputRequests(Board board) {
+        this.board = board;
+    }
+
+
+
     /**
      * The user is asked for a boardState, which will then be processed and tested to check if it is within the possible
      * realm of possibilities. If the tests fail, an informative error message will be displayed, and the user will
      * again be asked for a boardState, until a valid boardState is provided.
+     * @deprecated
+     * The gameboard initial state will not be provided by the user anymore. Instead, the board will always be empty
+     * at the start of a round
      *
      * @return a valid boardState as a string, already treated for usage by other methods, and free of possible error
      * causing defects.
      */
-    public static String boardStateRequest() {
-        String input = "";
-        int errorCode = 0;
+    @Deprecated
+    public String boardStateRequest() {
+        String input;
+        int errorCode;
         do {
             System.out.println("Enter the cells: ");
             input = boardStateInputTreatment();
@@ -33,10 +50,13 @@ public class InputRequests {
 
     /**
      * Scans the input boardState and treats it to be further processed and analyzed.
+     * @deprecated
+     * This method supports the previous method boardStateRequest, which is also deprecated.
      *
      * @return the boardState ready for further processing, as a String.
      */
-    private static String boardStateInputTreatment() {
+    @Deprecated
+    private String boardStateInputTreatment() {
         Scanner scanner = new Scanner(System.in);
         String boardState = scanner.nextLine();
         String stringTreated = boardState.toUpperCase();
@@ -49,15 +69,14 @@ public class InputRequests {
      * realm of possibilities. If the tests fail, an informative error message will be displayed, and the user will
      * again be asked for a coordinate, until a valid coordinate is provided.
      *
-     * @param board the game board, required to guess which will be the symbol representing the new coordinate.
      * @return a valid coordinate already treated for usage by other methods, and free of possible error
      * causing defects.
      */
-    public static Coordinate coordinateRequest(Board board) {
-        String input = "";
-        int errorCode = 0;
+    public Coordinate coordinateRequest() {
+        String input;
+        int errorCode;
         do {
-            System.out.println("Enter the coordinates: ");
+            System.out.println("\nEnter the coordinates: ");
             Scanner scanner = new Scanner(System.in);
             input = scanner.nextLine();
             InputCheck inputCheck = new InputCheck(input, 0);
@@ -66,9 +85,7 @@ public class InputRequests {
             ErrorList errorList = new ErrorList(errorCode);
             System.out.print(errorList.errorMessage());
         } while (errorCode != 0);
-        Coordinate coordinate = new Coordinate(Character.getNumericValue(input.charAt(0)),
-                Character.getNumericValue(input.charAt(2)), ' ');
-        coordinate.setCoordinateSymbol(board);
-        return coordinate;
+        return new Coordinate(Character.getNumericValue(input.charAt(0)),
+                Character.getNumericValue(input.charAt(2)), 'X');
     }
 }

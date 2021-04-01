@@ -4,14 +4,10 @@ public class Main {
     public static void main(String[] args) {
 
 
-        String input = InputRequests.boardStateRequest();
-        Board board = new Board(input);
-        board.boardPrint();
-        Coordinate coordinate = InputRequests.coordinateRequest(board);
-        board.setBoardState(coordinate);
-        GameState gameState = new GameState("Processing", board);
-        gameState.checkGameState();
-        board.boardPrint();
-        System.out.println(gameState.getGameState());
+        Board board = new Board();
+        AI easyAI = new AI("easy", board);
+        Rounds gameRound = new Rounds(true, false, board, easyAI);
+        gameRound.fullGame();
+
     }
 }
