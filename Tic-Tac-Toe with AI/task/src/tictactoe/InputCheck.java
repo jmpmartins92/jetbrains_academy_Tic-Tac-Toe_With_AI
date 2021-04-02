@@ -102,8 +102,9 @@ public class InputCheck {
                 System.exit(0);
         } else if (menuCommands.length == 3 && menuCommands[0].equals("start")) {
             for (int command = 1; command < menuCommands.length; command++) {
-                if (!(menuCommands[command].equals("easy") ||
-                        menuCommands[command].equals("user"))) {
+                if (!(menuCommands[command].equals("user") ||
+                        menuCommands[command].equals("easy") ||
+                        menuCommands[command].equals("medium"))) {
                     setErrorCode(Character.getNumericValue(error[0].charAt(0)));
                     return error;
 

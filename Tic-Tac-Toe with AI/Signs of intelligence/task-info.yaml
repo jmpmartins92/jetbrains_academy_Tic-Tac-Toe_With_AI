@@ -716,6 +716,1035 @@ files:
         }
     }
   learner_created: false
+- name: src/tictactoe/InputCheck.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    /**
+     * Class responsible for analyzing the input and reporting any errors. The input will not be accepted until it passes
+     * all tests.
+     */
+    public class InputCheck {
+
+        String input;
+        int errorCode;
+
+        /**
+         * Constructor for checking the input for errors.
+         *
+         * @param input String that the users provides.
+         * @param errorCode int value that corresponds to a specific error, utilized for messages from ErrorList class.
+         */
+        public InputCheck(String input, int errorCode) {
+            this.input = input;
+            this.errorCode = errorCode;
+        }
+
+        /**
+         * Getter for errorCode
+         *
+         * @return value of the errorCode as in int.
+         */
+        public int getErrorCode() {
+            return errorCode;
+        }
+
+        /**
+         * Setter for errorCode
+         *
+         * @param errorCode Sets the current errorCode by the provided int value.
+         */
+        public void setErrorCode(int errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        /**
+         * Tests executed when the input is a boardState. It checks if the length is exactly 9, corresponding to the 9
+         * different coordinates of the board. It checks if the input contains only valid chars, namely X, O and ' '.
+         * If it passes both tests, sets the errorCode to 0, which corresponds to no errors. Otherwise, it will set the
+         * errorCode to a specific value to provide the appropriate error message.
+         * @deprecated
+         * The user will no longer provide a boardState.
+         *
+         */
+        @Deprecated
+        public void initialBoardStateCheck() {
+            if (input.length() != 9) {
+                setErrorCode(1);
+            } else if (!input.matches("^[XO ]+$")) {
+                setErrorCode(2);
+            } else {
+                setErrorCode(0);
+            }
+
+        }
+
+        /**
+         * Tests executed when the input is a coordinate. It checks if the input contains nothing other than digits and ' '.
+         * It checks if the input contains only numbers from 1 to 3, which are respectively the minimum and maximum position
+         * of each axis. Checks if the provided coordinate is an empty cell or not, as the user cannot change cells that
+         * were already played. If it passes all tests, sets the errorCode to 0, which corresponds to no errors. Otherwise,
+         * it will set the errorCode to a specific value to provide the appropriate error message.
+         *
+         * @param board board game, which is required to check if the provided coordinate is an empty cell or not.
+         */
+        public void inputCoordinateCheck(Board board) {
+
+            if (!input.matches("^[\\d ]+$")) {
+                setErrorCode(3);
+            } else if (!input.matches("^[123 ]+$")) {
+                setErrorCode(4);
+            } else if (board.getCoordSymbol(Character.getNumericValue(input.charAt(0)),
+                    Character.getNumericValue(input.charAt(2))) != ' ') {
+                setErrorCode(5);
+            } else {
+                setErrorCode(0);
+            }
+
+        }
+
+        /**
+         * Tests executed for the string provided as the commands start or exit the game. There must be either a single
+         * command "exit", which will terminate the program, or 3 command parameters. The first must be, specifically,
+         * "start", and the 2 following ones must be a combination of the different available difficulties, that will
+         * represent AI players, and/or "user", if one or two users want to play.
+         *
+         * @param input string provided by the user that will define the game type
+         * @return either a string array with a single element containing the corresponding errorCode, or the 3 necessary
+         * commands to start the game.
+         */
+        public String[] inputInitialMenuCheck(String input) {
+            String[] menuCommands = input.split(" ");
+            String[] error = new String[]{"6"};
+            if (menuCommands.length == 1 && menuCommands[0].equals("exit")) {
+                    System.out.println("Game exiting...");
+                    setErrorCode(0);
+                    System.exit(0);
+            } else if (menuCommands.length == 3 && menuCommands[0].equals("start")) {
+                for (int command = 1; command < menuCommands.length; command++) {
+                    if (!(menuCommands[command].equals("easy") ||
+                            menuCommands[command].equals("user"))) {
+                        setErrorCode(Character.getNumericValue(error[0].charAt(0)));
+                        return error;
+
+                    } else {
+                        setErrorCode(0);
+                        return menuCommands;
+                    }
+                }
+            } else {
+                setErrorCode(Character.getNumericValue(error[0].charAt(0)));
+                return error;
+            }
+            return error;
+        }
+
+
+
+    }
+  learner_created: true
+- name: src/tictactoe/GameState.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    /**
+     * Class that defines the current state of the game i.e. if it is still in progress, or there is already a winner, or
+     * it is a draw.
+     */
+    public class GameState {
+
+        String gameState;
+        Board board;
+
+        /**
+         * Constructor to set the game state, given by a string, which represents the state of the game, and the
+         * corresponding game board
+         *
+         * @param gameState String representing the state of the game.
+         * @param board game Board at that gameState.
+         */
+        public GameState(String gameState, Board board) {
+            this.gameState = gameState;
+            this.board = board;
+        }
+
+        /**
+         * Getter for the gameState
+         *
+         * @return String representing the state of the game.
+         */
+        public String getGameState() {
+            return gameState;
+        }
+
+        /**
+         * Setter for the gameState
+         *
+         * @param gameState String representing the state of the game.
+         */
+        public void setGameState(String gameState) {
+            this.gameState = gameState;
+        }
+
+
+        /**
+         * Analyzes if there is a victor during the current gameState of the board. It first checks if there are 3 equal
+         * symbols in a row at the diagonals of the board, then checks the rows and finally the columns. The symbols must
+         * a playable one (i.e. it can't be an empty cell). The gameState is updated accordingly to the victorious symbol,
+         * in case of a victory.
+         *
+         * @return boolean true if the game has been won, or false if it has not.
+         */
+        private boolean gameWon() {
+            if ((board.getCoordSymbol(1, 1) == board.getCoordSymbol(2, 2)
+                    && board.getCoordSymbol(1, 1) == board.getCoordSymbol(3, 3)
+                    &&  board.getCoordSymbol(2,2) != ' ') ||
+                    (board.getCoordSymbol(3, 1) == board.getCoordSymbol(2, 2)
+                            && board.getCoordSymbol(3, 1) == board.getCoordSymbol(1, 3)
+                    && board.getCoordSymbol(2,2) != ' ')) {
+                setGameState(board.getCoordSymbol(2, 2) + " wins" );
+                return true;
+            }
+
+            for (int y = 3; y > 0; y--) {
+                if (board.getCoordSymbol(y, 3) == board.getCoordSymbol(y, 2) &&
+                        board.getCoordSymbol(y, 3) == board.getCoordSymbol(y, 1) &&
+                                board.getCoordSymbol(y,3) != ' ') {
+                    setGameState(board.getCoordSymbol(y, 3) + " wins" );
+                    return true;
+                }
+            }
+
+            for (int x = 3; x > 0; x--) {
+                if (board.getCoordSymbol(3, x) == board.getCoordSymbol(2, x) &&
+                        board.getCoordSymbol(3, x) == board.getCoordSymbol(1, x) &&
+                                board.getCoordSymbol(3,x) != ' ') {
+                    setGameState(board.getCoordSymbol(3, x) + " wins" );
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        /**
+         * By checking if the game board still has empty cells, informs that the game has or not been finished. It only
+         * holds true if the previous method gameWon() returns false, as not all cells have to be filled in order to a
+         * game to be won and, therefore, finished.
+         *
+         * @return boolean true if the game has not been finished, and false if otherwise.
+         */
+        private boolean gameNotFinishedCheck() {
+            boolean condition = board.getBoardState().contains(" ");
+            if (condition) {
+                setGameState("Game not finished");
+            }
+            return condition;
+        }
+
+        /**
+         * Checks if there are any empty cells and, if not, the game state is set to a draw. As the previous method
+         * gameNotFinishedCheck(), the result of this method only holds true if the method gameWon() returns false.
+         *
+         */
+        private void drawCheck() {
+            boolean condition = board.getBoardState().contains(" ");
+            if (!condition) {
+                setGameState("Draw");
+            }
+        }
+
+        /**
+         * Checks the gameState by checking each possible state, by a logical order to avoid false results. That is, it is
+         * only possible to check if the game has not finished after checking if there was a victor. In the same way,
+         * it is only possible to check if the game resulted in a draw after checking if it has not finished.
+         */
+        public void checkGameState() {
+            if (!gameWon()) {
+                if (!gameNotFinishedCheck()) {
+                    drawCheck();
+                }
+            }
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/Board.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    import java.util.Scanner;
+
+    /**
+     * Class that defines a board game, with a specific boardState of the type String.
+     */
+    public class Board {
+
+        String boardState;
+
+        /**
+         * Constructor to create a board, represents all the coordinates, defined by the parameter boardState.
+         *
+         * @param boardState String with 9 chars that can be either ' ', X or O. ' ' represents a empty cell. The position
+         *                   of the coordinate is from top left to bottom right.
+         */
+        public Board(String boardState) {
+            this.boardState = boardState;
+        }
+
+         static final String EMPTYBOARD= "         ";
+
+
+        /**
+         * Constructor to create an empty board, defining its boardState as a string with 9 ' ' (spaces), representing the
+         * 9 existing coordinates as empty cells.
+         */
+        public Board() {
+            this.boardState = EMPTYBOARD;
+        }
+
+        /**
+         * Getter for the boardState of a game board.
+         *
+         * @return boardState variable as a string.
+         */
+        public String getBoardState() {
+            return boardState;
+        }
+
+        /**
+         * Setter for the boardState of a game board.
+         *
+         * @param boardState String representing the symbols of each coordinate of the game board.
+         */
+        public void setBoardState(String boardState) {
+            this.boardState = boardState;
+        }
+
+
+        /**
+         * Getter for a symbol of a specific pair of values representing a coordinate.
+         *
+         * @param y Int variable of the Y axis value.
+         * @param x Int variable of the X axis value.
+         * @return Char representing the symbol located at the given coordinate.
+         */
+        public char getCoordSymbol(int y, int x) {
+            return getBoardState().charAt(boardStateCharIndex(y, x));
+        }
+
+        /**
+         * Setter for the boardState, by updating a coordinate value. It does so by replacing the symbol of coordinate with
+         * the symbol of the coordinate that represents the same position.
+         *
+         * @param coordinate Coordinate of the board game that is to be changed.
+         */
+        public void setBoardState(Coordinate coordinate) {
+            int y = coordinate.yCoordinate;
+            int x = coordinate.xCoordinate;
+            StringBuilder updatedBoardState = new StringBuilder();
+            updatedBoardState.append(boardState);
+            updatedBoardState.replace(boardStateCharIndex(y, x), boardStateCharIndex(y, x) + 1, String.valueOf(coordinate.symbol));
+            setBoardState(updatedBoardState.toString());
+        }
+
+        /**
+         * Calculates the corresponding index of a string as a boardState, providing a pair of values that may represent a
+         * coordinate.
+         *
+         * @param y Int variable of the Y axis value.
+         * @param x Int variable of the X axis value.
+         * @return index of a string, as an Int.
+         */
+        private int boardStateCharIndex (int y, int x) {
+            return ((y - 1) * 3 + x - 1);
+        }
+
+        /**
+         * prints the board on the Output Console, as a formatted grid, placing at each coordinate the corresponding symbol.
+         */
+        public void boardPrint() {
+            System.out.print("\n---------");
+            System.out.printf("\n| %s %s %s |",
+                    getCoordSymbol(1, 1), getCoordSymbol(1, 2), getCoordSymbol(1, 3));
+            System.out.printf("\n| %s %s %s |",
+                    getCoordSymbol(2, 1), getCoordSymbol(2, 2), getCoordSymbol(2, 3));
+            System.out.printf("\n| %s %s %s |",
+                    getCoordSymbol(3,1), getCoordSymbol(3, 2), getCoordSymbol(3, 3));
+            System.out.print("\n---------\n");
+        }
+
+        /**
+         * The user is asked for a coordinate, which will then be processed and tested to check if it is within the possible
+         * realm of possibilities. If the tests fail, an informative error message will be displayed, and the user will
+         * again be asked for a coordinate, until a valid coordinate is provided.
+         *
+         * @param player will decide which symbol, X or O, will be replacing the empty cell.
+         * @return a valid coordinate already treated for usage by other methods, and free of possible error
+         * causing defects.
+         */
+        public Coordinate coordinateRequest(Player player) {
+            String input;
+            int errorCode;
+            do {
+                System.out.println("\nEnter the coordinates: ");
+                Scanner scanner = new Scanner(System.in);
+                input = scanner.nextLine();
+                InputCheck inputCheck = new InputCheck(input, 0);
+                inputCheck.inputCoordinateCheck(this);
+                errorCode = inputCheck.getErrorCode();
+                ErrorList errorList = new ErrorList(errorCode);
+                System.out.print(errorList.errorMessage());
+            } while (errorCode != 0);
+            return new Coordinate(Character.getNumericValue(input.charAt(0)),
+                    Character.getNumericValue(input.charAt(2)), player.getSymbol());
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/Rounds.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    /**
+     * Class that keeps track of the moves and state of the game, and connects the necessary steps to go through each round.
+     */
+    public class Rounds {
+        Boolean gameOver;
+        Board board;
+        AI ai;
+        Menu menu;
+        GameState gameState;
+
+
+
+
+        /**
+         * Constructor for Rounds class, which will have a different behaviour accordingly to its inputs.
+         *
+         * @param gameOver boolean that is set to true if the game as ended, putting and end to the program, otherwise it
+         *        is set to false
+         * @param board is the game board on which the rounds are taking action
+         * @param ai is the difficulty level of the ai;
+         * @param menu is menu that contains the parameters chosen by the user, to run the program in different modes
+         * @param gameState is the situation of the current state, for example, if it is ongoing or if a player has won.
+         */
+        public Rounds(Boolean gameOver, Board board, AI ai, Menu menu, GameState gameState) {
+            this.gameOver = gameOver;
+            this.board = board;
+            this.ai = ai;
+            this.menu = menu;
+            this.gameState = gameState;
+        }
+
+        /**
+         * Constructor for Rounds class, that takes only the inital user input as a menu, by assuming a basic default case
+         * for the other variables.
+         *
+         * @param menu
+         */
+        public Rounds(Menu menu) {
+            this.gameOver = false;
+            this.board = new Board();
+            this.ai = new AI("easy", this.board);
+            this.menu = menu;
+            this.gameState = new GameState("Game not finished", board);
+        }
+
+        /**
+         * Getter that informs if the game has ended, true if so, false if it did not end yet.
+         *
+         * @return boolean value true for game to be over, false if it should continue.
+         */
+        public Boolean getGameOver() {
+            return gameOver;
+        }
+
+        /**
+         * Setter for the GameOver, ending the game or if it should prooced.
+         *
+         * @param gameOver boolean value that sets the game as ended if true, and if it should continue if false.
+         */
+        public void setGameOver(Boolean gameOver) {
+            this.gameOver = gameOver;
+        }
+
+
+        /**
+         * Method that analyzes the move to the game state made after a move, and updates info accordingly, namely updating
+         * the gameState and choosing the next player (user or AI).
+         */
+        private void gameStaging() {
+            board.boardPrint();
+            gameState.checkGameState();
+            if (gameState.getGameState().equals("Game not finished")) {
+                setGameOver(false);
+            } else {
+                System.out.println(gameState.getGameState());
+                setGameOver(true);
+            }
+        }
+
+        /**
+         * Sequence of actions taken during a user turn, namely requesting coordinates to the user, testing if input is
+         * valid, and updating the game state.
+         */
+        public void userTurn(Player player) {
+            Coordinate coordinate = board.coordinateRequest(player);
+            board.setBoardState(coordinate);
+            gameStaging();
+        }
+
+        /**
+         * Sequence of actions taken during an AI turn, namely requesting coordinates to the user, testing if input is
+         * valid, and updating the game state.
+         */
+        public void aITurn(Player player) {
+            System.out.println("\nMaking move level \"" + ai.getLevel() + "\"");
+            ai.aiMove(player);
+            gameStaging();
+        }
+
+
+        /**
+         * Creates a new player that will take the role of the first player, accordingly to the menu information.
+         *
+         * @return a new player, which plays the X symbol, and is the first to play.
+         */
+        public Player setPlayer1Info() {
+            return new Player(menu.getPlayer1(), 'X', board);
+        }
+
+        /**
+         * Creates a new player that will take the role of the second player, accordingly to the menu information.
+         *
+         * @return a new player, which plays the O symbol, and is the second to play.
+         */
+        public Player setPlayer2Info() {
+            return new Player(menu.getPlayer2(), 'O', board);
+        }
+
+        /**
+         * It makes a player move, which depends of the type of player at that turn (if human or AI).
+         *
+         * @param player dictates if the move should be taken by the user, or a AI at the defined difficulty
+         */
+        public void playerMove(Player player) {
+            switch (player.getPlayerType()) {
+                case ("user"):
+                    userTurn(player);
+                    break;
+                case ("easy"):
+                    ai.setLevel("easy");
+                    aITurn(player);
+                    break;
+            }
+        }
+
+        /**
+         * method that runs the game until the game ends.
+         */
+        public void fullGame() {
+            Player player1 = setPlayer1Info();
+            Player player2 = setPlayer2Info();
+            board.boardPrint();
+            while (!getGameOver()) {
+                playerMove(player1);
+                if (!getGameOver()) {
+                    playerMove(player2);
+                }
+            }
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/AI.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    import java.util.Random;
+
+    /**
+     * Class AI that provides coordinates, following a specific set of rules defined by its difficulty level.
+     */
+    public class AI {
+
+        String level;
+        Board board;
+
+        /**
+         * Constructor that creates an AI with a certain difficulty level.
+         *
+         * @param level difficulty as a String.
+         * @param board on which the AI will be setting its move.
+         */
+        public AI(String level, Board board) {
+            this.level = level;
+            this.board = board;
+        }
+
+        /**
+         * Default constructor that, if not provided with a specific level, it will be set as easy level.
+         *
+         * @param board on which the AI will be setting its move.
+         */
+        public AI(Board board) {
+            this.level = "easy";
+            this.board = board;
+        }
+
+
+        /**
+         * Getter for the difficulty level of the selected AI.
+         *
+         * @return level of the AI as a string.
+         */
+        public String getLevel() {
+            return level;
+        }
+
+        /**
+         * Setter for the difficulty level of the selected AI.
+         *
+         * @param level string that must match the possible available difficulty levels.
+         */
+        public void setLevel(String level) {
+            this.level = level;
+        }
+
+        /**
+         * Chooses the difficulty level of the move to be taken by the AI. Already prepared to add new difficulty levels.
+         */
+        public void aiMove(Player player) {
+            switch (this.getLevel()) {
+                case "easy":
+                    levelMoveEasy(player);
+                    break;
+                default:
+                    levelMoveEasy(player);
+                    break;
+            }
+        }
+
+        /**
+         * Plays a move on the difficulty level easy. at this difficulty, the AI will just choose a random empty cell as a
+         * move. It does so by retrieving the current board state, picking a random cell which is represented as a char in
+         * the board state string, and check if it is empty. If it is not empty, it will keep choosing other random cells,
+         * otherwise, it will replace the current char at the chosen index to O, and updates the boardState.
+         *
+         * @param player dictates which symbol will be replacing the empty cell.
+         */
+        private void levelMoveEasy(Player player) {
+            Random random = new Random();
+            StringBuilder auxSB = new StringBuilder();
+            auxSB.append(board.getBoardState());
+            boolean validMove;
+            do {
+                int randomIndex = random.nextInt(9);
+                if (auxSB.charAt(randomIndex) == ' ') {
+                    auxSB.replace(randomIndex, randomIndex + 1, Character.toString(player.getSymbol()));
+                    validMove = true;
+                } else {
+                    validMove = false;
+                }
+            } while (!validMove);
+            board.setBoardState(auxSB.toString());
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/ErrorList.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    /**
+     * Class that contains an error code, which is connected to helpful error messages, depending of the test that the input
+     * failed
+     */
+    public class ErrorList {
+
+        int errorCode;
+
+        /**
+         * Constructor for the List of possible errors.
+         *
+         * @param errorCode a int value corresponding to a specific error
+         */
+        public ErrorList(int errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        /**
+         * Creates an informative error message, according to the errorCode provided. If the errorCode is 0, it is means
+         * that the tested input passed all tests, and should be accepted as valid.
+         *
+         * @return A string with information about the error.
+         */
+        public String errorMessage() {
+            switch (errorCode) {
+                case 1:
+                    return "\nIncorrect input length\n";
+                case 2:
+                    return "\nInvalid input, should only include X, O or _ symbols\n";
+                case 3:
+                    return "\nYou should enter numbers!\n";
+                case 4:
+                    return "\nCoordinates should be from 1 to 3!\n";
+                case 5:
+                    return "\nThis cell is occupied! Choose another one!\n";
+                case 6:
+                    return "\nBad parameters!\n";
+                case 0:
+                    return "";
+                default:
+                    return "\nDid not check for errors\n";
+            }
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/Player.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    /**
+     * Class that defines a player, which may be an AI at any difficulty, or a user.
+     */
+    public class Player {
+
+
+        String playerType;
+        char symbol;
+        Board board;
+        AI ai;
+
+
+        /**
+         * Constructor for the default player, that is considered of the type user, will place the X symbol, which also
+         * means it is the first to play.
+         */
+        public Player() {
+            this.playerType = "user";
+            this.symbol = 'X';
+        }
+
+        /**
+         * Constructor for a player, which may be a user or an AI of the specified difficulty, may be player 1 or 2,
+         * it acknowledges the current board, as the AI requires a board to decide its moves. This will only matter if
+         * the constructor creates a player of the type AI.
+         *
+         * @param playerType may be "user" for a human player, "easy" or any string of other AI difficulty levels.
+         * @param symbol may be a char X or O, and will determine the turns that will play (odd ones for X and O even ones).
+         * @param board is the current board state.
+         */
+        public Player(String playerType, char symbol, Board board) {
+            this.playerType = playerType;
+            this.symbol = symbol;
+            this.board = board;
+            this.ai = new AI(board);
+        }
+
+
+        /**
+         * Getter for the playerType
+         *
+         * @return string "user" for a human player, "easy" or any string of other AI difficulty levels.
+         */
+        public String getPlayerType() {
+            return playerType;
+        }
+
+        /**
+         * Getter for the symbol of the player
+         *
+         * @return char X or O, depending if it gets the symbol of the first or the second player.
+         */
+        public char getSymbol() {
+            return symbol;
+        }
+    }
+  learner_created: true
+- name: src/tictactoe/Coordinate.java
+  visible: true
+  text: |
+    package tictactoe;
+
+    /**
+     * Class that defines a coordinate of the board game, with a specific symbol.
+     */
+    public class Coordinate {
+
+        int yCoordinate;
+        int xCoordinate;
+        char symbol;
+
+        /**
+         * Constructor to set X and Y coordinates, as well as its representation in the game board.
+         *
+         * @param yCoordinate y axis value for the coordinate.
+         * @param xCoordinate x axis value for the coordinate.
+         * @param symbol coordinate's representation on the game board.
+         */
+        public Coordinate (int yCoordinate, int xCoordinate, char symbol) {
+            this.yCoordinate = yCoordinate;
+            this.xCoordinate = xCoordinate;
+            this.symbol = symbol;
+        }
+
+        /**
+         * Getter for the symbol variable.
+         *
+         * @return symbol variable as a char.
+         */
+        public char getSymbol() {
+            return symbol;
+        }
+
+        /**
+         * Setter for the symbol variable.
+         *
+         * @param symbol Char representing the coordinate on the game board.
+         */
+        public void setSymbol(char symbol) {
+            this.symbol = symbol;
+        }
+
+        /**
+         * Getter for the X axis value of the coordinate.
+         *
+         * @return X axis value as an int.
+         */
+        public int getxCoordinate() {
+            return xCoordinate;
+        }
+
+
+        /**
+         * Setter for the X axis value of the coordinate.
+         *
+         * @param xCoordinate Int indicating the X axis value.
+         */
+        public void setxCoordinate(int xCoordinate) {
+            this.xCoordinate = xCoordinate;
+        }
+
+
+        /**
+         * Getter for the Y axis value of the coordinate.
+         *
+         * @return Y axis value as an int.
+         */
+        public int getyCoordinate() {
+            return yCoordinate;
+        }
+
+        /**
+         * Setter for the Y axis value of the coordinate.
+         *
+         * @param yCoordinate Int indicating the Y axis value.
+         */
+        public void setyCoordinate(int yCoordinate) {
+            this.yCoordinate = yCoordinate;
+        }
+
+        /**
+         * Creates an array with the Y and X values of a coordinate.
+         *
+         * @return coordinates represented as an array of ints, in the form (Y, X).
+         */
+        public int[] getCoordinate() {
+            return new int[]{this.getyCoordinate(), this.getxCoordinate()};
+        }
+
+        /**
+         * Setter for all coordinate variables
+         *
+         * @param yCoordinate Int indicating the Y axis value.
+         * @param xCoordinate Int indicating the X axis value.
+         * @param symbol Char representing the coordinate on the game board.
+         */
+        public void setCoordinate(int yCoordinate, int xCoordinate, char symbol) {
+            setyCoordinate(yCoordinate);
+            setxCoordinate(xCoordinate);
+            setSymbol(symbol);
+        }
+
+
+        /**
+         * Finds which symbol (X or O) should be set for a coordinate, depending on the present number of X and O characters
+         * on the game board.
+         * If there are more X's than O's on the board, sets the symbol to O. Otherwise, sets it to X.
+         *
+         * @param board the game board.
+         *
+         *
+         * @Deprecated
+         * The symbol of the coordinates provided by the user will now always be X, while the AI always plays O.
+         */
+        @Deprecated
+        public void setCoordinateSymbol(Board board) {
+            String boardState = board.getBoardState();
+            int numX = 0;
+            int numO = 0;
+            for (int index = 0; index < boardState.length(); index++) {
+                if (boardState.charAt(index) == 'X') {
+                    numX++;
+                }
+                if (boardState.charAt(index) == 'O') {
+                    numO++;
+                }
+            }
+            if (numX <= numO) {
+                setSymbol('X');
+            } else {
+                setSymbol('O');
+            }
+        }
+
+
+
+    }
+  learner_created: true
+- name: src/tictactoe/InputRequests.java
+  visible: true
+  text: "package tictactoe;\n\nimport java.util.Scanner;\n\n\n/**\n * Class that requests\
+    \ and treats the given inputs, namely boardStates and coordinates.\n */\npublic\
+    \ class InputRequests {\n\n    Board board;\n    Player player;\n\n    /**\n \
+    \    * Constructor for the requests made to the user.\n     *\n     * @param board\
+    \ which will be used to compare cells with provided input\n     * @param player\
+    \ which will be used to provide the correct symbol to replace empty cells.\n \
+    \    */\n    public InputRequests(Board board, Player player) {\n        this.board\
+    \ = board;\n        this.player = player;\n    }\n\n    public InputRequests()\
+    \ {\n        this.board = new Board();\n        this.player = new Player();\n\
+    \    }\n\n\n    /**\n     * The user is asked for a boardState, which will then\
+    \ be processed and tested to check if it is within the possible\n     * realm\
+    \ of possibilities. If the tests fail, an informative error message will be displayed,\
+    \ and the user will\n     * again be asked for a boardState, until a valid boardState\
+    \ is provided.\n     * @deprecated\n     * The gameboard initial state will not\
+    \ be provided by the user anymore. Instead, the board will always be empty\n \
+    \    * at the start of a round\n     *\n     * @return a valid boardState as a\
+    \ string, already treated for usage by other methods, and free of possible error\n\
+    \     * causing defects.\n     */\n    @Deprecated\n    private String boardStateRequest()\
+    \ {\n        String input;\n        int errorCode;\n        do {\n           \
+    \ System.out.println(\"Enter the cells: \");\n            input = boardStateInputTreatment();\n\
+    \            InputCheck inputCheck = new InputCheck(input, 0);\n            inputCheck.initialBoardStateCheck();\n\
+    \            errorCode = inputCheck.getErrorCode();\n            ErrorList errorList\
+    \ = new ErrorList(errorCode);\n            System.out.print(errorList.errorMessage());\n\
+    \        } while (errorCode != 0);\n        return input;\n    }\n\n    /**\n\
+    \     * Scans the input boardState and treats it to be further processed and analyzed.\n\
+    \     * @deprecated\n     * This method supports the previous method boardStateRequest,\
+    \ which is also deprecated.\n     *\n     * @return the boardState ready for further\
+    \ processing, as a String.\n     */\n    @Deprecated\n    private String boardStateInputTreatment()\
+    \ {\n        Scanner scanner = new Scanner(System.in);\n        String boardState\
+    \ = scanner.nextLine();\n        String stringTreated = boardState.toUpperCase();\n\
+    \        stringTreated = stringTreated.replace(\"_\", \" \");\n        return\
+    \ stringTreated;\n    }\n\n\n\n    public String[] inputInitialMenu() {\n    \
+    \    Scanner scanner = new Scanner(System.in);\n        int errorCode = 0;\n \
+    \       String[] menuCommands;\n\n        do {\n            System.out.println(\"\
+    Input command: \");\n            String input = scanner.nextLine();\n        \
+    \    InputCheck inputCheck = new InputCheck(input, 0);\n            menuCommands\
+    \ = inputCheck.inputInitialMenuCheck(input);\n            if (menuCommands.length\
+    \ == 1) {\n                errorCode = Character.getNumericValue(menuCommands[0].charAt(0));\n\
+    \            } else {\n                errorCode = 0;\n            }\n       \
+    \     ErrorList errorList = new ErrorList(errorCode);\n            System.out.print(errorList.errorMessage());\n\
+    \        } while (errorCode != 0);\n        return menuCommands;\n    }\n    \n\
+    \    \n}\n"
+  learner_created: true
+- name: src/tictactoe/Menu.java
+  visible: true
+  text: |+
+    package tictactoe;
+
+    /**
+     * Class that displays a menu that allows the user to choose the players, difficulties of AI, or exit the program.
+     */
+    public class Menu {
+
+        String command;
+        String player1;
+        String player2;
+
+        /**
+         * Constructor for the menu, which will have a command, that can be either "start" or "exit", and the role of each
+         * player, which can both be any combination of "user" and difficulty level of the AI.
+         *
+         * @param command string that will start or close the game;
+         * @param player1 properties of player 1
+         * @param player2 properties of player 2;
+         */
+        public Menu(String command, String player1, String player2) {
+            this.command = command;
+            this.player1 = player1;
+            this.player2 = player2;
+        }
+
+        /**
+         * Constructor for the menu that takes an already tested and prepared array of strings, that will start the program
+         * as pretended.
+         *
+         * @param parameters array of 3 strings already tested and treated. In this case, the command will always be start.
+         */
+        public Menu(String[] parameters) {
+            this.command = parameters[0];
+            this.player1 = parameters[1];
+            this.player2 = parameters[2];
+        }
+
+        public Menu() {
+            this.command = "start";
+            this.player1 = "user";
+            this.player2 = "user";
+
+        }
+
+        /**
+         * Getter of the info related to player1, namely if it is a user or the AI, and if so, on which difficulty.
+         *
+         * @return a string that defines player1;
+         */
+        public String getPlayer1() {
+            return player1;
+        }
+
+        /**
+         * Setter for player 1, which changes its type accordingly to the specified one.
+         *
+         * @param player1 String that may be "user" or any of the AI difficulties.
+         */
+        public void setPlayer1(String player1) {
+            this.player1 = player1;
+        }
+
+
+        /**
+         * Getter of the info related to player2, namely if it is a user or the AI, and if so, on which difficulty.
+         *
+         * @return a string that defines player2;
+         */
+        public String getPlayer2() {
+            return player2;
+        }
+
+        /**
+         * Setter for player 2, which changes its type accordingly to the specified one.
+         *
+         * @param player2 String that may be "user" or any of the AI difficulties.
+         */
+        public void setPlayer2(String player2) {
+            this.player2 = player2;
+        }
+
+    }
+
+
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/81/stages/450/implement
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/81/stages/450/implement">JetBrains
+    Academy</a>
+  time: Fri, 02 Apr 2021 18:20:31 UTC
 record: -1

@@ -132,6 +132,10 @@ public class Rounds {
                 ai.setLevel("easy");
                 aITurn(player);
                 break;
+            case ("medium"):
+                ai.setLevel("medium");
+                aITurn(player);
+                break;
         }
     }
 
