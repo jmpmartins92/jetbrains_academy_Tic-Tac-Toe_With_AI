@@ -1,5 +1,7 @@
 package tictactoe;
 
+import java.util.Scanner;
+
 /**
  * Class that defines a board game, with a specific boardState of the type String.
  */
@@ -17,13 +19,15 @@ public class Board {
         this.boardState = boardState;
     }
 
+     static final String EMPTYBOARD= "         ";
+
 
     /**
      * Constructor to create an empty board, defining its boardState as a string with 9 ' ' (spaces), representing the
      * 9 existing coordinates as empty cells.
      */
     public Board() {
-        this.boardState = "         ";
+        this.boardState = EMPTYBOARD;
     }
 
     /**
@@ -95,5 +99,31 @@ public class Board {
         System.out.printf("\n| %s %s %s |",
                 getCoordSymbol(3,1), getCoordSymbol(3, 2), getCoordSymbol(3, 3));
         System.out.print("\n---------\n");
+    }
+
+    /**
+     * The user is asked for a coordinate, which will then be processed and tested to check if it is within the possible
+     * realm of possibilities. If the tests fail, an informative error message will be displayed, and the user will
+     * again be asked for a coordinate, until a valid coordinate is provided.
+     *
+     * @param player will decide which symbol, X or O, will be replacing the empty cell.
+     * @return a valid coordinate already treated for usage by other methods, and free of possible error
+     * causing defects.
+     */
+    public Coordinate coordinateRequest(Player player) {
+        String input;
+        int errorCode;
+        do {
+            System.out.println("\nEnter the coordinates: ");
+            Scanner scanner = new Scanner(System.in);
+            input = scanner.nextLine();
+            InputCheck inputCheck = new InputCheck(input, 0);
+            inputCheck.inputCoordinateCheck(this);
+            errorCode = inputCheck.getErrorCode();
+            ErrorList errorList = new ErrorList(errorCode);
+            System.out.print(errorList.errorMessage());
+        } while (errorCode != 0);
+        return new Coordinate(Character.getNumericValue(input.charAt(0)),
+                Character.getNumericValue(input.charAt(2)), player.getSymbol());
     }
 }

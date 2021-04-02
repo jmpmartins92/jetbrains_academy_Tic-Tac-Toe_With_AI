@@ -9,16 +9,23 @@ import java.util.Scanner;
 public class InputRequests {
 
     Board board;
+    Player player;
 
     /**
      * Constructor for the requests made to the user.
      *
      * @param board which will be used to compare cells with provided input
+     * @param player which will be used to provide the correct symbol to replace empty cells.
      */
-    public InputRequests(Board board) {
+    public InputRequests(Board board, Player player) {
         this.board = board;
+        this.player = player;
     }
 
+    public InputRequests() {
+        this.board = new Board();
+        this.player = new Player();
+    }
 
 
     /**
@@ -33,7 +40,7 @@ public class InputRequests {
      * causing defects.
      */
     @Deprecated
-    public String boardStateRequest() {
+    private String boardStateRequest() {
         String input;
         int errorCode;
         do {
@@ -64,28 +71,28 @@ public class InputRequests {
         return stringTreated;
     }
 
-    /**
-     * The user is asked for a coordinate, which will then be processed and tested to check if it is within the possible
-     * realm of possibilities. If the tests fail, an informative error message will be displayed, and the user will
-     * again be asked for a coordinate, until a valid coordinate is provided.
-     *
-     * @return a valid coordinate already treated for usage by other methods, and free of possible error
-     * causing defects.
-     */
-    public Coordinate coordinateRequest() {
-        String input;
-        int errorCode;
+
+
+    public String[] inputInitialMenu() {
+        Scanner scanner = new Scanner(System.in);
+        int errorCode = 0;
+        String[] menuCommands;
+
         do {
-            System.out.println("\nEnter the coordinates: ");
-            Scanner scanner = new Scanner(System.in);
-            input = scanner.nextLine();
+            System.out.println("Input command: ");
+            String input = scanner.nextLine();
             InputCheck inputCheck = new InputCheck(input, 0);
-            inputCheck.inputCoordinateCheck(board);
-            errorCode = inputCheck.getErrorCode();
+            menuCommands = inputCheck.inputInitialMenuCheck(input);
+            if (menuCommands.length == 1) {
+                errorCode = Character.getNumericValue(menuCommands[0].charAt(0));
+            } else {
+                errorCode = 0;
+            }
             ErrorList errorList = new ErrorList(errorCode);
             System.out.print(errorList.errorMessage());
         } while (errorCode != 0);
-        return new Coordinate(Character.getNumericValue(input.charAt(0)),
-                Character.getNumericValue(input.charAt(2)), 'X');
+        return menuCommands;
     }
+    
+    
 }

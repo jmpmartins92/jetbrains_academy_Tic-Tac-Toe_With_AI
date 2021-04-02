@@ -83,4 +83,42 @@ public class InputCheck {
 
     }
 
+    /**
+     * Tests executed for the string provided as the commands start or exit the game. There must be either a single
+     * command "exit", which will terminate the program, or 3 command parameters. The first must be, specifically,
+     * "start", and the 2 following ones must be a combination of the different available difficulties, that will
+     * represent AI players, and/or "user", if one or two users want to play.
+     *
+     * @param input string provided by the user that will define the game type
+     * @return either a string array with a single element containing the corresponding errorCode, or the 3 necessary
+     * commands to start the game.
+     */
+    public String[] inputInitialMenuCheck(String input) {
+        String[] menuCommands = input.split(" ");
+        String[] error = new String[]{"6"};
+        if (menuCommands.length == 1 && menuCommands[0].equals("exit")) {
+                System.out.println("Game exiting...");
+                setErrorCode(0);
+                System.exit(0);
+        } else if (menuCommands.length == 3 && menuCommands[0].equals("start")) {
+            for (int command = 1; command < menuCommands.length; command++) {
+                if (!(menuCommands[command].equals("easy") ||
+                        menuCommands[command].equals("user"))) {
+                    setErrorCode(Character.getNumericValue(error[0].charAt(0)));
+                    return error;
+
+                } else {
+                    setErrorCode(0);
+                    return menuCommands;
+                }
+            }
+        } else {
+            setErrorCode(Character.getNumericValue(error[0].charAt(0)));
+            return error;
+        }
+        return error;
+    }
+
+
+
 }

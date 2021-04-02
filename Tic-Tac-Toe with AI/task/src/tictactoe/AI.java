@@ -53,14 +53,13 @@ public class AI {
     /**
      * Chooses the difficulty level of the move to be taken by the AI. Already prepared to add new difficulty levels.
      */
-    public void aiMove() {
-        String level = getLevel();
-        switch (level) {
+    public void aiMove(Player player) {
+        switch (this.getLevel()) {
             case "easy":
-                levelMoveEasy();
+                levelMoveEasy(player);
                 break;
             default:
-                levelMoveEasy();
+                levelMoveEasy(player);
                 break;
         }
     }
@@ -70,8 +69,10 @@ public class AI {
      * move. It does so by retrieving the current board state, picking a random cell which is represented as a char in
      * the board state string, and check if it is empty. If it is not empty, it will keep choosing other random cells,
      * otherwise, it will replace the current char at the chosen index to O, and updates the boardState.
+     *
+     * @param player dictates which symbol will be replacing the empty cell.
      */
-    private void levelMoveEasy() {
+    private void levelMoveEasy(Player player) {
         Random random = new Random();
         StringBuilder auxSB = new StringBuilder();
         auxSB.append(board.getBoardState());
@@ -79,7 +80,7 @@ public class AI {
         do {
             int randomIndex = random.nextInt(9);
             if (auxSB.charAt(randomIndex) == ' ') {
-                auxSB.replace(randomIndex, randomIndex + 1, "O");
+                auxSB.replace(randomIndex, randomIndex + 1, Character.toString(player.getSymbol()));
                 validMove = true;
             } else {
                 validMove = false;

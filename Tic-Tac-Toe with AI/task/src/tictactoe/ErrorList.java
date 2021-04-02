@@ -35,6 +35,8 @@ public class ErrorList {
                 return "\nCoordinates should be from 1 to 3!\n";
             case 5:
                 return "\nThis cell is occupied! Choose another one!\n";
+            case 6:
+                return "\nBad parameters!\n";
             case 0:
                 return "";
             default:

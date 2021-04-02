@@ -50,10 +50,11 @@ public class GameState {
      */
     private boolean gameWon() {
         if ((board.getCoordSymbol(1, 1) == board.getCoordSymbol(2, 2)
-                && board.getCoordSymbol(1, 1) == board.getCoordSymbol(3, 3)) ||
+                && board.getCoordSymbol(1, 1) == board.getCoordSymbol(3, 3)
+                &&  board.getCoordSymbol(2,2) != ' ') ||
                 (board.getCoordSymbol(3, 1) == board.getCoordSymbol(2, 2)
-                        && board.getCoordSymbol(3, 1) == board.getCoordSymbol(1, 3))
-                && board.getCoordSymbol(2,2) != ' ') {
+                        && board.getCoordSymbol(3, 1) == board.getCoordSymbol(1, 3)
+                && board.getCoordSymbol(2,2) != ' ')) {
             setGameState(board.getCoordSymbol(2, 2) + " wins" );
             return true;
         }
@@ -101,7 +102,7 @@ public class GameState {
      *
      */
     private void drawCheck() {
-        boolean condition = !board.getBoardState().contains(" ");
+        boolean condition = board.getBoardState().contains(" ");
         if (!condition) {
             setGameState("Draw");
         }
