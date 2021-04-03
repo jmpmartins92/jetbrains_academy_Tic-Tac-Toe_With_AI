@@ -136,6 +136,13 @@ public class Rounds {
                 ai.setLevel("medium");
                 aITurn(player);
                 break;
+            case ("hard"):
+                ai.setLevel("hard");
+                aITurn(player);
+                break;
+            default:
+                System.out.println("error, player not recognized");
+                break;
         }
     }
 

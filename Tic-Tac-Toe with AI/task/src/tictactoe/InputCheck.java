@@ -72,6 +72,8 @@ public class InputCheck {
 
         if (!input.matches("^[\\d ]+$")) {
             setErrorCode(3);
+        } else if (input.length() != 3) {
+            setErrorCode(1);
         } else if (!input.matches("^[123 ]+$")) {
             setErrorCode(4);
         } else if (board.getCoordSymbol(Character.getNumericValue(input.charAt(0)),
@@ -102,20 +104,24 @@ public class InputCheck {
                 System.exit(0);
         } else if (menuCommands.length == 3 && menuCommands[0].equals("start")) {
             for (int command = 1; command < menuCommands.length; command++) {
-                if (!(menuCommands[command].equals("user") ||
+                if (menuCommands[command].equals("user") ||
                         menuCommands[command].equals("easy") ||
-                        menuCommands[command].equals("medium"))) {
-                    setErrorCode(Character.getNumericValue(error[0].charAt(0)));
-                    return error;
-
+                        menuCommands[command].equals("medium") ||
+                        menuCommands[command].equals("hard")) {
+                    if (command == 2) {
+                        setErrorCode(0);
+                        return menuCommands;
+                    }
                 } else {
-                    setErrorCode(0);
-                    return menuCommands;
+                    setErrorCode(6);
+                    error[0] = "6";
+                    return error;
                 }
             }
         } else {
-            setErrorCode(Character.getNumericValue(error[0].charAt(0)));
-            return error;
+            setErrorCode(6);
+            error[0] = "6";
+
         }
         return error;
     }

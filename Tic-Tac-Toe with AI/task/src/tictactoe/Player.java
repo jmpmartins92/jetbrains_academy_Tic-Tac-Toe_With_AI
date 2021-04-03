@@ -55,4 +55,13 @@ public class Player {
     public char getSymbol() {
         return symbol;
     }
+
+    /**
+     * Setter for the symbol of the player.
+     *
+     * @param symbol char that is either O or X.
+     */
+    public void setSymbol(char symbol) {
+        this.symbol = symbol;
+    }
 }
